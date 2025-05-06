@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { 
   Bell, Calendar, FileText, Home, PlusCircle, Settings, User
@@ -10,10 +9,6 @@ const sidebarLinks = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
   { icon: FileText, label: "My Warranties", path: "/warranties" },
   { icon: PlusCircle, label: "Add Warranty", path: "/add-warranty" },
-  { icon: Calendar, label: "Upcoming Expirations", path: "/upcoming" },
-  { icon: Bell, label: "Notifications", path: "/notifications" },
-  { icon: User, label: "Profile", path: "/profile" },
-  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 export function Sidebar() {
@@ -48,17 +43,6 @@ export function Sidebar() {
           ))}
         </ul>
       </nav>
-      <div className="border-t p-4">
-        <div className="flex items-center gap-4 rounded-lg px-3 py-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-            <User className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-medium">John Doe</p>
-            <p className="text-xs text-muted-foreground">john@example.com</p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

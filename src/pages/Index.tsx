@@ -1,9 +1,11 @@
-
 import { Link } from "react-router-dom";
-import { ArrowRight, Check, FileText, Scan, Shield } from "lucide-react";
+import { ArrowRight, Check, FileText, Scan, Shield, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "../context/AuthContext";
 
 export default function Index() {
+  const { token, logout } = useAuth();
+
   const features = [
     {
       icon: <FileText className="h-10 w-10 text-primary" />,
@@ -25,6 +27,13 @@ export default function Index() {
     },
   ];
 
+  const handleScrollToFeatures = () => {
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -41,15 +50,34 @@ export default function Index() {
                 storage, automated reminders, and OCR document scanning.
               </p>
               <div className="flex flex-col gap-4 pt-4 sm:flex-row">
-                <Button asChild size="lg" className="gap-2">
-                  <Link to="/dashboard">
-                    Get Started
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <Link to="/about">Learn More</Link>
-                </Button>
+                {token ? (
+                  <>
+                    <Button asChild size="lg" className="gap-2">
+                      <Link to="/dashboard">
+                        Go to Dashboard
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="lg" onClick={logout}>
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button asChild size="lg" className="gap-2">
+                      <Link to="/register">
+                        Get Started
+                        <UserPlus className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="lg">
+                       <Link to="/login">
+                         Login
+                         <LogIn className="h-4 w-4 ml-2" />
+                       </Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex items-center justify-center">
@@ -71,7 +99,7 @@ export default function Index() {
       </header>
 
       {/* Features Section */}
-      <section className="py-16 lg:py-24">
+      <section id="features" className="py-16 lg:py-24">
         <div className="container mx-auto max-w-6xl px-6">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -128,9 +156,11 @@ export default function Index() {
                 ))}
               </ul>
               <div className="mt-8">
-                <Button asChild size="lg">
-                  <Link to="/dashboard">Start Organizing</Link>
-                </Button>
+                {!token && (
+                  <Button asChild size="lg">
+                    <Link to="/register">Start Organizing</Link>
+                  </Button>
+                )}
               </div>
             </div>
             <div className="order-first md:order-last">
@@ -151,19 +181,29 @@ export default function Index() {
         <div className="container mx-auto max-w-4xl px-6">
           <div className="rounded-2xl bg-primary/5 p-8 text-center sm:p-12">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Ready to Get Started?
+              {token ? 'Manage Your Warranties' : 'Ready to Get Started?'}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              Join thousands of users who have simplified their warranty
-              management with Warranty Vault.
+              {token
+                ? 'Go to your dashboard to view and add warranties.'
+                : 'Join thousands of users who have simplified their warranty management with Warranty Vault.'}
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-              <Button asChild size="lg" className="gap-2">
-                <Link to="/dashboard">
-                  Start Using Warranty Vault
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+              {token ? (
+                 <Button asChild size="lg" className="gap-2">
+                   <Link to="/dashboard">
+                     Go to Dashboard
+                     <ArrowRight className="h-4 w-4" />
+                   </Link>
+                 </Button>
+              ) : (
+                <Button asChild size="lg" className="gap-2">
+                  <Link to="/register">
+                    Start Using Warranty Vault
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>

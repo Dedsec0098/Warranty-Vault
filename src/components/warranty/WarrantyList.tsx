@@ -1,46 +1,77 @@
-
-import { useState } from "react";
-import { 
-  Filter, 
-  List, 
-  Grid as GridIcon, 
-  CheckSquare, 
-  Clock, 
-  FileX 
+import { useState } from "react"; // Remove useEffect
+import {
+  Filter,
+  List,
+  Grid as GridIcon,
+  CheckSquare,
+  Clock,
+  FileX,
+  // Remove Loader2 and AlertTriangle if loading/error handled by parent
 } from "lucide-react";
 import { WarrantyCard } from "./WarrantyCard";
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-// Sample data
-import { warranties } from "@/data/sampleWarranties";
+// Update Warranty type to include fields from MongoDB (_id, etc.)
+interface Warranty {
+  _id: string; // Use _id from MongoDB
+  id?: string; // Keep optional id if used elsewhere, though _id is primary
+  productName: string;
+  brand: string;
+  purchaseDate: string;
+  expiryDate: string;
+  category: string;
+  retailer?: string;
+  serialNumber?: string;
+  notes?: string;
+  image?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 type WarrantyView = "grid" | "list";
 type WarrantyStatus = "all" | "active" | "expiring" | "expired";
 
-export function WarrantyList() {
+interface WarrantyListProps {
+  warranties: Warranty[]; // Keep warranties prop
+  isLoading?: boolean; // Optional: Pass loading state from parent
+  error?: string | null; // Optional: Pass error state from parent
+  // Remove onDelete prop
+  // onDelete: (id: string) => void;
+}
+
+// Remove onDelete from the function parameters
+export function WarrantyList({ warranties, isLoading, error }: WarrantyListProps) {
+  // Remove internal state for data, loading, and error
+  // const [warrantiesData, setWarrantiesData] = useState<Warranty[]>([]);
+  // const [isLoading, setIsLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<WarrantyView>("grid");
   const [status, setStatus] = useState<WarrantyStatus>("all");
   const [category, setCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Filter warranties
+  // Remove useEffect for fetching data
+  // useEffect(() => { ... }, []);
+
+  // Filter warranties based on the passed 'warranties' prop
   const filteredWarranties = warranties.filter((warranty) => {
+    // ... (keep existing filtering logic) ...
     // Filter by search query
     if (
       searchQuery &&
@@ -75,6 +106,7 @@ export function WarrantyList() {
     return true;
   });
 
+  // ... (keep statusOptions and categories) ...
   const statusOptions = [
     { value: "all", label: "All Warranties", icon: CheckSquare },
     { value: "active", label: "Active", icon: CheckSquare },
@@ -84,8 +116,20 @@ export function WarrantyList() {
 
   const categories = ["all", "Electronics", "Appliances", "Furniture", "Automotive", "Other"];
 
+
+  // Remove internal Loading State - Parent should handle this
+  // if (isLoading) { ... }
+
+  // Remove internal Error State - Parent should handle this
+  // if (error) { ... }
+
+  // Update initial empty check based on the prop (optional, parent might handle)
+  // if (warranties.length === 0 && !isLoading && !error) { ... }
+
+
   return (
     <div className="space-y-4">
+      {/* ... (keep header and filter controls) ... */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">My Warranties</h2>
@@ -162,12 +206,17 @@ export function WarrantyList() {
         </div>
       </div>
 
+
+      {/* Render based on filteredWarranties derived from the prop */}
       {filteredWarranties.length === 0 ? (
         <div className="flex h-60 flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
           <FileX className="h-10 w-10 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">No warranties found</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Try adjusting your search or filters
+            {searchQuery || category !== 'all' || status !== 'all'
+              ? "Try adjusting your search or filters."
+              // Update the message slightly as the component doesn't know if *any* warranties exist
+              : "No warranties match the current filters, or you haven't added any yet."}
           </p>
         </div>
       ) : (
@@ -181,9 +230,10 @@ export function WarrantyList() {
         >
           {filteredWarranties.map((warranty) => (
             <WarrantyCard
-              key={warranty.id}
-              {...warranty}
-              className={view === "list" ? "flex flex-row h-32" : ""}
+              key={warranty._id} // Use _id as the key
+              warranty={warranty} // Pass the whole warranty object as the 'warranty' prop
+              // Remove onDelete prop being passed
+              // onDelete={onDelete}
             />
           ))}
         </div>

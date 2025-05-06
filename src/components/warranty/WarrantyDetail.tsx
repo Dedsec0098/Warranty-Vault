@@ -1,25 +1,24 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { 
+import {
   AlertTriangle,
-  ArrowLeft, 
-  Bell, 
-  Calendar, 
-  Clock, 
-  Edit, 
-  FileText, 
-  Share2, 
-  Trash2 
+  ArrowLeft,
+  Bell,
+  Calendar,
+  Clock,
+  Edit,
+  FileText,
+  Share2,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,7 +33,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { warranties } from "@/data/sampleWarranties";
+
+// Define an empty array as a placeholder for warranties
+const warranties: any[] = [];
 
 export function WarrantyDetail() {
   const { id } = useParams<{ id: string }>();
