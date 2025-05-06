@@ -239,38 +239,52 @@ Regards,\nWarranty Vault`,
 }
 
 // --- Scheduled Task (Cron Job) ---
-cron.schedule('07 7 * * *', async () => { // Run daily at 9:30 AM IST
+cron.schedule('11 11 * * *', async () => { // Run daily at 9:30 AM IST
   console.log('Running daily warranty notification check...');
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0); // Normalize today to the start of the day
 
-  // Calculate notification trigger dates
-  const oneDayBefore = new Date(today); oneDayBefore.setDate(today.getDate() + 1);
-  const oneWeekBefore = new Date(today); oneWeekBefore.setDate(today.getDate() + 7);
-  const oneMonthBefore = new Date(today); oneMonthBefore.setMonth(today.getMonth() + 1);
+  // Calculate target expiry dates based on today
+  const oneDayFromToday = new Date(today); oneDayFromToday.setDate(today.getDate() + 1);
+  const oneWeekFromToday = new Date(today); oneWeekFromToday.setDate(today.getDate() + 7);
+  const oneMonthFromToday = new Date(today); oneMonthFromToday.setMonth(today.getMonth() + 1);
+
+  // Ensure we haven't notified recently (e.g., within the last 23 hours to avoid double sends on edge cases)
+  const twentyThreeHoursAgo = new Date(Date.now() - 23 * 60 * 60 * 1000);
 
   try {
-    // Find warranties expiring exactly 1 day, 1 week, or 1 month from today
-    // Also ensure we haven't notified for this expiry recently (e.g., within the last 12 hours)
-    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
-
+    // Find warranties where the preference matches the expiry date relative to today
+    // and notification hasn't been sent recently.
     const warrantiesToNotify = await Warranty.find({
-      $or: [
-        { expiryDate: oneDayBefore },
-        { expiryDate: oneWeekBefore },
-        { expiryDate: oneMonthBefore },
-      ],
-      $or: [
-          { lastNotified: { $lt: twelveHoursAgo } }, // Last notified more than 12 hours ago
-          { lastNotified: { $exists: false } }      // Never notified
+      $and: [ // Must meet notification timing criteria AND preference criteria
+        { // Notification timing criteria
+          $or: [
+            { lastNotified: { $lt: twentyThreeHoursAgo } }, // Last notified more than 23 hours ago
+            { lastNotified: { $exists: false } }      // Never notified
+          ]
+        },
+        { // Preference and expiry date matching criteria
+          $or: [
+            // Notify if preference is '1d' AND expiry is 1 day from today
+            { reminderPreference: '1d', expiryDate: oneDayFromToday },
+            // Notify if preference is '7d' AND expiry is 1 week from today
+            { reminderPreference: '7d', expiryDate: oneWeekFromToday },
+            // Notify if preference is '30d' AND expiry is 1 month from today
+            { reminderPreference: '30d', expiryDate: oneMonthFromToday },
+            // Also handle default case if preference wasn't set but expiry is 1 week away
+            { reminderPreference: { $exists: false }, expiryDate: oneWeekFromToday }
+          ]
+        },
+        // Explicitly exclude those who opted out
+        { reminderPreference: { $ne: 'none' } }
       ]
     }).populate('userId'); // Populate the user details to get notificationEmail
 
-    console.log(`Found ${warrantiesToNotify.length} warranties due for notification.`);
+    console.log(`Found ${warrantiesToNotify.length} warranties due for notification based on preferences.`);
 
     for (const warranty of warrantiesToNotify) {
       if (warranty.userId) { // Check if user details were populated
-        console.log(`Triggering notification for ${warranty.productName} (User: ${warranty.userId.email}, Expires: ${new Date(warranty.expiryDate).toLocaleDateString()})`);
+        console.log(`Triggering notification for ${warranty.productName} (User: ${warranty.userId.email}, Expires: ${new Date(warranty.expiryDate).toLocaleDateString()}, Preference: ${warranty.reminderPreference || 'default (7d)'})`);
         await sendNotification(warranty, warranty.userId);
       } else {
           console.warn(`Skipping notification for warranty ${warranty._id}: User details not found.`);
