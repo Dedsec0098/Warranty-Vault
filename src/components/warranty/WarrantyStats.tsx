@@ -6,11 +6,11 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Define the structure of a warranty object (adjust based on your actual data structure)
+
 interface Warranty {
   id: string;
   expiryDate: string; // Assuming date string format like 'YYYY-MM-DD'
-  // Add other relevant properties if needed for calculations
+ 
 }
 
 interface StatCardProps {
